@@ -9,6 +9,8 @@
 // @match      *://hackforums.net/*
 // @copyright  2016+
 // @iconURL https://raw.githubusercontent.com/xadamxk/HF-Userscripts/master/scripticon.jpg
+// @updateURL https://raw.githubusercontent.com/xadamxk/HF-API-Plugins/master/HF%20PM%20Push%20Notifications%20Userscript/HF%20PM%20Push%20Notifications%20Userscript.user.js
+// @downloadURL https://raw.githubusercontent.com/xadamxk/HF-API-Plugins/master/HF%20PM%20Push%20Notifications%20Userscript/HF%20PM%20Push%20Notifications%20Userscript.user.js
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_deleteValue
