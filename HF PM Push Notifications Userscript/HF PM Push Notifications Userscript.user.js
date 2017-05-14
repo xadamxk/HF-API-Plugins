@@ -9,8 +9,6 @@
 // @match      *://hackforums.net/*
 // @copyright  2016+
 // @iconURL https://raw.githubusercontent.com/xadamxk/HF-Userscripts/master/scripticon.jpg
-// @updateURL https://raw.githubusercontent.com/xadamxk/HF-API-Plugins/master/HF%20PM%20Push%20Notifications%20Userscript/HF%20PM%20Push%20Notifications%20Userscript.user.js
-// @downloadURL https://raw.githubusercontent.com/xadamxk/HF-API-Plugins/master/HF%20PM%20Push%20Notifications%20Userscript/HF%20PM%20Push%20Notifications%20Userscript.user.js
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_deleteValue
@@ -19,8 +17,7 @@
 // version 1.0.0: Beta Release
 // ==/UserScript==
 // ------------------------------ Dev Notes -----------------------------
-//    In order to send a push notifcation, you need a Pushover license ($5) 
-//    and an API Token, which can be made at https://pushover.net/api.
+//
 // ------------------------------ SETTINGS ------------------------------
 // HF API Key (https://hackforums.net/apikey.php)
 var apikey = "";
@@ -44,12 +41,11 @@ setInterval(function(){
     var jsonObj = steralizeJson(xhr.response);
     // Json Response
     //console.log(jsonObj);
-
     // Get list of pm ids
-    $.each(jsonObj.result.pminfo, function(pmID, item) {
+    $.each(jsonObj.result, function(pmID, item) {
         // If message is unread
         if($(this)[0].status == "0"){
-            generateOutput(pmID,$(this)[0].dateline,$(this)[0].sender,$(this)[0].subject);
+            generateOutput($(this)[0].pmid,$(this)[0].dateline,$(this)[0].sender,$(this)[0].subject);
         }
     });
 }, interval);
