@@ -2,7 +2,7 @@
 // @name       HF PM Push Notifications
 // @author xadamxk
 // @namespace  https://github.com/xadamxk/
-// @version    1.0.1
+// @version    1.0.2
 // @description  Receive push notifications for PMs from HF.
 // @require https://code.jquery.com/jquery-3.1.1.js
 // @match      *://hackforums.net*
@@ -13,6 +13,7 @@
 // @grant       GM_setValue
 // @grant       GM_deleteValue
 // ------------------------------ Change Log ----------------------------
+// version 1.0.2: Compatible with V1 Beta
 // version 1.0.1: Public Release
 // version 1.0.0: Beta Release
 // ==/UserScript==
@@ -32,33 +33,41 @@ var interval = 1000 * 60 * 5; // 1000 milli * 60 secs * x = minutes (No lower th
 // ------------------------------ On Page ------------------------------
 // Key used to store pm timestamps.
 const GM_ValAddr = "datelineList"; // (Default: 'datelineList')
-//GM_setValue(GM_ValAddr, "");
-setInterval(function(){
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', "https://"+siteAPI+"/apicall.php?key="+apikey+"&inbox", false); // true for async
-    xhr.send();
+GM_deleteValue(GM_ValAddr);
+//setInterval(function(){
+$.ajax
+({
+    type: "GET",
+    url: "https://"+siteAPI+"/api/v1/inbox",
+    dataType: 'json',
+    async: false,
+    username: apikey,
+    password: "",
+    success: function (data){
+        // Get list of pm ids
+        $.each(data.result, function(pmID, item) {
+            // If message is unread
+            if($(this)[0].status == "0"){
+                generateOutput($(this)[0].pmid,$(this)[0].dateline,$(this)[0].sender,$(this)[0].subject);
+            }
+        });
 
-    var jsonObj = steralizeJson(xhr.response);
-    // Json Response
-    //console.log(jsonObj);
-    // Get list of pm ids
-    $.each(jsonObj.result, function(pmID, item) {
-        // If message is unread
-        if($(this)[0].status == "0"){
-            generateOutput($(this)[0].pmid,$(this)[0].dateline,$(this)[0].sender,$(this)[0].subject);
-        }
-    });
-}, interval);
+    }});
+//}, interval);
 // ------------------------------ Functions ------------------------------
 // Generate output info
 function generateOutput(pmid,date,sender,subject){
     var existingRecord = false;
-    var prevInfo = GM_getValue(GM_ValAddr, false); // false if empty
-    console.log(prevInfo);
+    var prevInfo = String(GM_getValue(GM_ValAddr, false)); // false if empty
     var datelineArray;
     if (!prevInfo){
     } else {
-        datelineArray = prevInfo.trim().split(',');
+        if(prevInfo.includes(",")){
+            datelineArray = prevInfo.trim().split(',');
+        } else{
+            datelineArray = prevInfo;
+        }
+        //console.log(datelineArray);
         for (var i = 0; i < datelineArray.length; i++) {
             if(datelineArray[i] == date.toString()){
                 existingRecord = true;
@@ -74,16 +83,25 @@ function generateOutput(pmid,date,sender,subject){
         else
             GM_setValue(GM_ValAddr, GM_getValue(GM_ValAddr) + "," + date);
         // Get username of uid
-        var xhrUsername = new XMLHttpRequest();
-        xhrUsername.open('GET', "https://"+siteAPI+"/apicall.php?key="+apikey+"&uid="+sender, false); // true for async
-        xhrUsername.send();
-        var jsonObjname = steralizeJson(xhrUsername.response);
+        var senderUsername;
+        $.ajax({
+            type: "GET",
+            url: "https://"+siteAPI+"/api/v1/user/"+sender,
+            dataType: 'json',
+            async: false,
+            username: apikey,
+            password: "",
+            success: function (data){
+                // Username of sender
+                senderUsername = data.result.username;
+            }
+        });
         // Send notification
         $.post("https://api.pushover.net/1/messages.json",
                {
             "token": pushoverAPIToken,
             "user": pushoverUserKey,
-            "message": "From: "+jsonObjname.result.username+".",
+            "message": "From: "+senderUsername+".",
             "title": "New Mesage: "+subject,
             "url": "https://"+siteAPI+"/private.php?action=read&pmid="+pmid,
             "url_title": "Click to Open PM",
