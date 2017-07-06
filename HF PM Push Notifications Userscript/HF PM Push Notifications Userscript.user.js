@@ -33,8 +33,8 @@ var interval = 1000 * 60 * 5; // 1000 milli * 60 secs * x = minutes (No lower th
 // ------------------------------ On Page ------------------------------
 // Key used to store pm timestamps.
 const GM_ValAddr = "datelineList"; // (Default: 'datelineList')
-GM_deleteValue(GM_ValAddr);
-//setInterval(function(){
+//GM_deleteValue(GM_ValAddr);
+setInterval(function(){
 $.ajax
 ({
     type: "GET",
@@ -53,7 +53,7 @@ $.ajax
         });
 
     }});
-//}, interval);
+}, interval);
 // ------------------------------ Functions ------------------------------
 // Generate output info
 function generateOutput(pmid,date,sender,subject){
